@@ -360,6 +360,8 @@ export class App extends React.Component<IAppProps, IAppState> {
       case 'rebase-branch':
         this.props.dispatcher.recordMenuInitiatedRebase()
         return this.showRebaseDialog()
+      case 'cherrypick-branch':
+        return this.showRepositorySettings()
       case 'show-repository-settings':
         return this.showRepositorySettings()
       case 'view-repository-on-github':
@@ -603,7 +605,7 @@ export class App extends React.Component<IAppProps, IAppState> {
 
     const compareURL = `${htmlURL}/compare/${
       branchTip.branch.upstreamWithoutRemote
-    }`
+      }`
     this.props.dispatcher.openInBrowser(compareURL)
   }
 
@@ -1304,7 +1306,7 @@ export class App extends React.Component<IAppProps, IAppState> {
       case PopupType.RenameBranch:
         const stash =
           this.state.selectedState !== null &&
-          this.state.selectedState.type === SelectionType.Repository
+            this.state.selectedState.type === SelectionType.Repository
             ? this.state.selectedState.state.changesState.stashEntry
             : null
         return (

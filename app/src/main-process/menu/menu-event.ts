@@ -20,6 +20,7 @@ export type MenuEvent =
   | 'compare-to-branch'
   | 'merge-branch'
   | 'rebase-branch'
+  | 'cherrypick-branch'
   | 'show-repository-settings'
   | 'open-in-shell'
   | 'compare-on-github'

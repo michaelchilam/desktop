@@ -8,6 +8,7 @@ export type MenuIDs =
   | 'update-branch'
   | 'merge-branch'
   | 'rebase-branch'
+  | 'cherrypick-branch'
   | 'view-repository-on-github'
   | 'compare-on-github'
   | 'open-in-shell'
