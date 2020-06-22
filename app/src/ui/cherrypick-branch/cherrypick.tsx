@@ -15,6 +15,12 @@ import {
 
 import { BranchList, IBranchListItem, renderDefaultBranch } from '../branches'
 
+import { ComputedAction } from '../../models/computed-action'
+// import { promiseWithMinimumTimeout } from '../../lib/promise'
+// import { getAheadBehind, mergeTree } from '../../lib/git'
+// import { revSymmetricDifference } from '../../lib/git'
+import { ActionStatusIcon } from '../lib/action-status-icon'
+
 interface ICherryPickProps {
   readonly dispatcher: Dispatcher
   readonly repository: Repository
@@ -76,7 +82,6 @@ export class CherryPick extends React.Component<
 > {
   public constructor(props: ICherryPickProps) {
     super(props)
-    console.log(props.allBranches.length)
 
     const selectedBranch = this.resolveSelectedBranch()
 
@@ -110,12 +115,12 @@ export class CherryPick extends React.Component<
 
     return (
       <Dialog
-        id="cherrypick"
+        id="cherry-pick"
         onDismissed={this.props.onDismissed}
         onSubmit={this.cherryPick}
         title={
           <>
-            Cherrypick into <strong>{currentBranchName}</strong>
+            Cherry-pick into <strong>{currentBranchName}</strong>
           </>
         }
       >
@@ -134,6 +139,7 @@ export class CherryPick extends React.Component<
           />
         </DialogContent>
         <DialogFooter>
+          {this.renderMergeInfo()}
           <OkCancelButtonGroup
             okButtonText={
               <>
@@ -147,6 +153,124 @@ export class CherryPick extends React.Component<
           />
         </DialogFooter>
       </Dialog>
+    )
+  }
+
+  private renderMergeInfo() {
+    const { currentBranch } = this.props
+    const { selectedBranch, mergeStatus, commitCount } = this.state
+
+    if (
+      mergeStatus == null ||
+      currentBranch == null ||
+      selectedBranch == null ||
+      currentBranch.name === selectedBranch.name ||
+      commitCount == null
+    ) {
+      return null
+    }
+
+    return (
+      <div className="merge-status-component">
+        <ActionStatusIcon
+          status={this.state.mergeStatus}
+          classNamePrefix="merge-status"
+        />
+        <p className="merge-info">
+          {this.renderMergeStatusMessage(
+            mergeStatus,
+            selectedBranch,
+            currentBranch,
+            commitCount
+          )}
+        </p>
+      </div>
+    )
+  }
+
+  private renderMergeStatusMessage(
+    mergeStatus: CherryPickResult,
+    branch: Branch,
+    currentBranch: Branch,
+    commitCount: number
+  ): JSX.Element {
+    if (mergeStatus.kind === ComputedAction.Loading) {
+      return this.renderLoadingMergeMessage()
+    }
+
+    if (mergeStatus.kind === ComputedAction.Clean) {
+      return this.renderCleanMergeMessage(branch, currentBranch, commitCount)
+    }
+
+    if (mergeStatus.kind === ComputedAction.Invalid) {
+      return this.renderInvalidMergeMessage()
+    }
+
+    return this.renderConflictedMergeMessage(
+      branch,
+      currentBranch,
+      mergeStatus.conflictedFiles
+    )
+  }
+
+  private renderLoadingMergeMessage() {
+    return (
+      <React.Fragment>
+        Checking for ability to merge automatically...
+      </React.Fragment>
+    )
+  }
+
+  private renderCleanMergeMessage(
+    branch: Branch,
+    currentBranch: Branch,
+    commitCount: number
+  ) {
+    if (commitCount === 0) {
+      return (
+        <React.Fragment>
+          {`This branch is up to date with `}
+          <strong>{branch.name}</strong>
+        </React.Fragment>
+      )
+    }
+
+    const pluralized = commitCount === 1 ? 'commit' : 'commits'
+    return (
+      <React.Fragment>
+        This will merge
+        <strong>{` ${commitCount} ${pluralized}`}</strong>
+        {` from `}
+        <strong>{branch.name}</strong>
+        {` into `}
+        <strong>{currentBranch.name}</strong>
+      </React.Fragment>
+    )
+  }
+
+  private renderInvalidMergeMessage() {
+    return (
+      <React.Fragment>
+        Unable to merge unrelated histories in this repository
+      </React.Fragment>
+    )
+  }
+
+  private renderConflictedMergeMessage(
+    branch: Branch,
+    currentBranch: Branch,
+    count: number
+  ) {
+    const pluralized = count === 1 ? 'file' : 'files'
+    return (
+      <React.Fragment>
+        There will be
+        <strong>{` ${count} conflicted ${pluralized}`}</strong>
+        {` when merging `}
+        <strong>{branch.name}</strong>
+        {` into `}
+        <strong>{currentBranch.name}</strong>
+      </React.Fragment>
     )
   }
 
