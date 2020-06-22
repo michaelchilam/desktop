@@ -64,6 +64,7 @@ import { AppMenuBar } from './app-menu'
 import { UpdateAvailable, renderBanner } from './banners'
 import { Preferences } from './preferences'
 import { Merge } from './merge-branch'
+import { CherryPick } from './cherrypick-branch'
 import { RepositorySettings } from './repository-settings'
 import { AppError } from './app-error'
 import { MissingRepository } from './missing-repository'
@@ -361,7 +362,8 @@ export class App extends React.Component<IAppProps, IAppState> {
         this.props.dispatcher.recordMenuInitiatedRebase()
         return this.showRebaseDialog()
       case 'cherrypick-branch':
-        return this.showRepositorySettings()
+        //this.props.dispatcher.recordMenuInitiatedCherryPick() // I don't need this?
+        return this.cherryPickBranch()
       case 'show-repository-settings':
         return this.showRepositorySettings()
       case 'view-repository-on-github':
@@ -584,6 +586,18 @@ export class App extends React.Component<IAppProps, IAppState> {
     })
   }
 
+  private cherryPickBranch() {
+    const state = this.state.selectedState
+    if (state == null || state.type !== SelectionType.Repository) {
+      return
+    }
+
+    this.props.dispatcher.showPopup({
+      type: PopupType.CherryPickBranch,
+      repository: state.repository,
+    })
+  }
+
   private compareBranchOnDotcom() {
     const htmlURL = this.getCurrentRepositoryGitHubURL()
     if (!htmlURL) {
@@ -605,7 +619,7 @@ export class App extends React.Component<IAppProps, IAppState> {
 
     const compareURL = `${htmlURL}/compare/${
       branchTip.branch.upstreamWithoutRemote
-      }`
+    }`
     this.props.dispatcher.openInBrowser(compareURL)
   }
 
@@ -1306,7 +1320,7 @@ export class App extends React.Component<IAppProps, IAppState> {
       case PopupType.RenameBranch:
         const stash =
           this.state.selectedState !== null &&
-            this.state.selectedState.type === SelectionType.Repository
+          this.state.selectedState.type === SelectionType.Repository
             ? this.state.selectedState.state.changesState.stashEntry
             : null
         return (
@@ -1411,6 +1425,34 @@ export class App extends React.Component<IAppProps, IAppState> {
         return (
           <Merge
             key="merge-branch"
+            dispatcher={this.props.dispatcher}
+            repository={repository}
+            allBranches={state.branchesState.allBranches}
+            defaultBranch={state.branchesState.defaultBranch}
+            recentBranches={state.branchesState.recentBranches}
+            currentBranch={currentBranch}
+            initialBranch={branch}
+            onDismissed={this.onPopupDismissed}
+          />
+        )
+      }
+      case PopupType.CherryPickBranch: {
+        const { repository, branch } = popup
+        const state = this.props.repositoryStateManager.get(repository)
+
+        const tip = state.branchesState.tip
+
+        // we should never get in this state since we disable the menu
+        // item in a detatched HEAD state, this check is so TSC is happy
+        if (tip.kind !== TipState.Valid) {
+          return null
+        }
+
+        const currentBranch = tip.branch
+
+        return (
+          <CherryPick
+            key="cherrypick-branch"
             dispatcher={this.props.dispatcher}
             repository={repository}
             allBranches={state.branchesState.allBranches}

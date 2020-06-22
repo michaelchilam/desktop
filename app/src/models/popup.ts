@@ -68,6 +68,7 @@ export enum PopupType {
   RebaseConflicts,
   ChooseForkSettings,
   ConfirmDiscardSelection,
+  CherryPickBranch,
 }
 
 export type Popup =
@@ -95,6 +96,11 @@ export type Popup =
   | { type: PopupType.Preferences; initialSelectedTab?: PreferencesTab }
   | {
       type: PopupType.MergeBranch
+      repository: Repository
+      branch?: Branch
+    }
+  | {
+      type: PopupType.CherryPickBranch
       repository: Repository
       branch?: Branch
     }

@@ -315,8 +315,8 @@ export function buildDefaultMenu({
         label: __DARWIN__
           ? 'Show in Finder'
           : __WIN32__
-            ? 'Show in E&xplorer'
-            : 'Show in your File Manager',
+          ? 'Show in E&xplorer'
+          : 'Show in your File Manager',
         id: 'open-working-directory',
         accelerator: 'CmdOrCtrl+Shift+F',
         click: emit('open-working-directory'),
@@ -415,9 +415,7 @@ export function buildDefaultMenu({
         click: emit('rebase-branch'),
       },
       {
-        label: __DARWIN__
-          ? 'Cherry-pick…'
-          : '&Cherry-pick…',
+        label: __DARWIN__ ? 'Cherry-pick…' : 'C&herry-pick…',
         id: 'cherrypick-branch',
         accelerator: 'CmdOrCtrl+Shift+C',
         click: emit('cherrypick-branch'),
@@ -494,8 +492,8 @@ export function buildDefaultMenu({
   const showLogsLabel = __DARWIN__
     ? 'Show Logs in Finder'
     : __WIN32__
-      ? 'S&how logs in Explorer'
-      : 'S&how logs in your File Manager'
+    ? 'S&how logs in Explorer'
+    : 'S&how logs in your File Manager'
 
   const showLogsItem: Electron.MenuItemConstructorOptions = {
     label: showLogsLabel,
