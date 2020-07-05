@@ -18,8 +18,17 @@ dialog#cherry-pick {
     }
   }
 
+  .filter-list.branches-list {
+    float: left;
+  }
+
+  #cherrypick-list {
+    float: right;
+  }
+
   .dialog-content {
     padding: 0;
+    display: table;
 
     .filter-field-row {
       margin: 0;

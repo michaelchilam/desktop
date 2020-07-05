@@ -20,6 +20,7 @@ import { ComputedAction } from '../../models/computed-action'
 // import { getAheadBehind, mergeTree } from '../../lib/git'
 // import { revSymmetricDifference } from '../../lib/git'
 import { ActionStatusIcon } from '../lib/action-status-icon'
+import { CherryPickList } from './cherrypicklist'
 
 interface ICherryPickProps {
   readonly dispatcher: Dispatcher
@@ -137,6 +138,7 @@ export class CherryPick extends React.Component<
             canCreateNewBranch={false}
             renderBranch={this.renderBranch}
           />
+          <CherryPickList />
         </DialogContent>
         <DialogFooter>
           {this.renderMergeInfo()}
